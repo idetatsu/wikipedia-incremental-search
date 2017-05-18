@@ -1,0 +1,12 @@
+#app {
+	width: 1000px;
+	margin: auto;
+}
+
+#search-form {
+	width: 600px;
+}
+
+#result-table {
+	width: 600px;
+}
