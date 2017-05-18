@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { FormControl, Table } from 'react-bootstrap';
+import { FormControl, Table, ButtonGroup, Button } from 'react-bootstrap';
+import config from './config.js';
 import '../css/app.css';
 
 export default class App extends Component {
@@ -9,7 +10,33 @@ export default class App extends Component {
 			value: '',
 			pageNum: 1,
 			total: 0,
-			articles: [],
+			articles: [
+				{
+					title: "Article title",
+					url: "https://google.com",
+					abstract: "Lorem ipsum dolor sit amet.",
+				},
+				{
+					title: "Article title",
+					url: "https://google.com",
+					abstract: "Lorem ipsum dolor sit amet.",
+				},
+				{
+					title: "Article title",
+					url: "https://google.com",
+					abstract: "Lorem ipsum dolor sit amet.",
+				},
+				{
+					title: "Article title",
+					url: "https://google.com",
+					abstract: "Lorem ipsum dolor sit amet.",
+				},
+				{
+					title: "Article title",
+					url: "https://google.com",
+					abstract: "Lorem ipsum dolor sit amet.",
+				},
+			],
 		};
 	}
 
@@ -18,9 +45,7 @@ export default class App extends Component {
 	}
 	
 	render() {
-		const articleTableRows = this.state.articles.map((article, index) => {
-			return(<ArticleTableRow key={index} num={index+1} article={article}/>);
-		});
+		const indexOfFirstArticle = (this.state.pageNum-1) * config.resultsPerPage + 1;
 		return(
 			<div id="app">
 				<h1>Wikipedia Incremental Search</h1>
@@ -30,32 +55,41 @@ export default class App extends Component {
 					placeholder="Search by keywords"
 					onChange={this.onFormChange.bind(this)}
 				/>
-				<Table id="result-table">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>Article</th>
-						</tr>
-					</thead>
-					<tbody>
-						{articleTableRows}
-					</tbody>
-				</Table>
+				<ButtonGroup>
+					<Button>{'<'}</Button>
+					<Button>{'>'}</Button>
+				</ButtonGroup>
+				<ArticleTable articles={this.state.articles} pageNum={this.state.pageNum} indexOfFirstArticle={indexOfFirstArticle}/>
 			</div>
 		);
 	}
 }
 
-class ArticleTableRow extends Component {
+class ArticleTable extends Component {
 	render() {
+		const articleTableRows = this.props.articles.map((article, index) => {
+			return (
+				<tr key={index}>
+					<td>{this.props.indexOfFirstArticle+index}.</td>
+					<td>
+						<a href={article.url} target="_blank">{article.title}</a>
+						<p>{article.abstract}</p>
+					</td>
+				</tr>
+			);
+		});
 		return (
-			<tr>
-				<td>{this.props.num}.</td>
-				<td>
-					<a href={this.props.article.url} target="_blank">{this.props.article.title}</a>
-					<p>{this.props.article.abstract}</p>
-				</td>
-			</tr>
+			<Table id="result-table">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Article</th>
+					</tr>
+				</thead>
+				<tbody>
+					{articleTableRows}
+				</tbody>
+			</Table>
 		);
 	}
 }

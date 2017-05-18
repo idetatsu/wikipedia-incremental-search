@@ -17823,6 +17823,10 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactBootstrap = __webpack_require__(347);
 
+var _config = __webpack_require__(447);
+
+var _config2 = _interopRequireDefault(_config);
+
 __webpack_require__(443);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -17845,7 +17849,27 @@ var App = function (_Component) {
 			value: '',
 			pageNum: 1,
 			total: 0,
-			articles: []
+			articles: [{
+				title: "Article title",
+				url: "https://google.com",
+				abstract: "Lorem ipsum dolor sit amet."
+			}, {
+				title: "Article title",
+				url: "https://google.com",
+				abstract: "Lorem ipsum dolor sit amet."
+			}, {
+				title: "Article title",
+				url: "https://google.com",
+				abstract: "Lorem ipsum dolor sit amet."
+			}, {
+				title: "Article title",
+				url: "https://google.com",
+				abstract: "Lorem ipsum dolor sit amet."
+			}, {
+				title: "Article title",
+				url: "https://google.com",
+				abstract: "Lorem ipsum dolor sit amet."
+			}]
 		};
 		return _this;
 	}
@@ -17858,9 +17882,7 @@ var App = function (_Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var articleTableRows = this.state.articles.map(function (article, index) {
-				return _react2.default.createElement(ArticleTableRow, { key: index, num: index + 1, article: article });
-			});
+			var indexOfFirstArticle = (this.state.pageNum - 1) * _config2.default.resultsPerPage + 1;
 			return _react2.default.createElement(
 				'div',
 				{ id: 'app' },
@@ -17876,32 +17898,20 @@ var App = function (_Component) {
 					onChange: this.onFormChange.bind(this)
 				}),
 				_react2.default.createElement(
-					_reactBootstrap.Table,
-					{ id: 'result-table' },
+					_reactBootstrap.ButtonGroup,
+					null,
 					_react2.default.createElement(
-						'thead',
+						_reactBootstrap.Button,
 						null,
-						_react2.default.createElement(
-							'tr',
-							null,
-							_react2.default.createElement(
-								'th',
-								null,
-								'#'
-							),
-							_react2.default.createElement(
-								'th',
-								null,
-								'Article'
-							)
-						)
+						'<'
 					),
 					_react2.default.createElement(
-						'tbody',
+						_reactBootstrap.Button,
 						null,
-						articleTableRows
+						'>'
 					)
-				)
+				),
+				_react2.default.createElement(ArticleTable, { articles: this.state.articles, pageNum: this.state.pageNum, indexOfFirstArticle: indexOfFirstArticle })
 			);
 		}
 	}]);
@@ -17911,46 +17921,77 @@ var App = function (_Component) {
 
 exports.default = App;
 
-var ArticleTableRow = function (_Component2) {
-	_inherits(ArticleTableRow, _Component2);
+var ArticleTable = function (_Component2) {
+	_inherits(ArticleTable, _Component2);
 
-	function ArticleTableRow() {
-		_classCallCheck(this, ArticleTableRow);
+	function ArticleTable() {
+		_classCallCheck(this, ArticleTable);
 
-		return _possibleConstructorReturn(this, (ArticleTableRow.__proto__ || Object.getPrototypeOf(ArticleTableRow)).apply(this, arguments));
+		return _possibleConstructorReturn(this, (ArticleTable.__proto__ || Object.getPrototypeOf(ArticleTable)).apply(this, arguments));
 	}
 
-	_createClass(ArticleTableRow, [{
+	_createClass(ArticleTable, [{
 		key: 'render',
 		value: function render() {
-			return _react2.default.createElement(
-				'tr',
-				null,
-				_react2.default.createElement(
-					'td',
-					null,
-					this.props.num,
-					'.'
-				),
-				_react2.default.createElement(
-					'td',
-					null,
+			var _this3 = this;
+
+			var articleTableRows = this.props.articles.map(function (article, index) {
+				return _react2.default.createElement(
+					'tr',
+					{ key: index },
 					_react2.default.createElement(
-						'a',
-						{ href: this.props.article.url, target: '_blank' },
-						this.props.article.title
+						'td',
+						null,
+						_this3.props.indexOfFirstArticle + index,
+						'.'
 					),
 					_react2.default.createElement(
-						'p',
+						'td',
 						null,
-						this.props.article.abstract
+						_react2.default.createElement(
+							'a',
+							{ href: article.url, target: '_blank' },
+							article.title
+						),
+						_react2.default.createElement(
+							'p',
+							null,
+							article.abstract
+						)
 					)
+				);
+			});
+			return _react2.default.createElement(
+				_reactBootstrap.Table,
+				{ id: 'result-table' },
+				_react2.default.createElement(
+					'thead',
+					null,
+					_react2.default.createElement(
+						'tr',
+						null,
+						_react2.default.createElement(
+							'th',
+							null,
+							'#'
+						),
+						_react2.default.createElement(
+							'th',
+							null,
+							'Article'
+						)
+					)
+				),
+				_react2.default.createElement(
+					'tbody',
+					null,
+					articleTableRows
 				)
 			);
 		}
 	}]);
 
-	return ArticleTableRow;
+	return ArticleTable;
 }(_react.Component);
 
 /***/ }),
@@ -18978,7 +19019,7 @@ exports = module.exports = __webpack_require__(139)(undefined);
 
 
 // module
-exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#search-form {\n\twidth: 600px;\n}\n\n#result-table {\n\twidth: 600px;\n}", ""]);
+exports.push([module.i, "#app {\r\n\twidth: 1000px;\r\n\tmargin: auto;\r\n}\r\n\r\n#search-form {\r\n\twidth: 300px;\r\n}\r\n\r\n#result-table {\r\n\twidth: 700px;\r\n}", ""]);
 
 // exports
 
@@ -18992,7 +19033,7 @@ exports = module.exports = __webpack_require__(139)(undefined);
 
 
 // module
-exports.push([module.i, "body {\n  margin: 0;\n  padding: 0;\n  font-family: sans-serif;\n}\n", ""]);
+exports.push([module.i, "body {\r\n  margin: 0;\r\n  padding: 0;\r\n  font-family: sans-serif;\r\n}\r\n", ""]);
 
 // exports
 
@@ -41227,6 +41268,20 @@ function isReactComponent(component) {
   return !!(component && component.prototype && component.prototype.isReactComponent);
 }
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
+
+/***/ }),
+/* 446 */,
+/* 447 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var config = {
+	"resultsPerPage": 10
+};
+
+module.exports = config;
 
 /***/ })
 /******/ ]);
