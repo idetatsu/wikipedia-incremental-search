@@ -3,10 +3,29 @@
 	margin: auto;
 }
 
+#title {
+	margin: 30px 0px;
+}
+
+#search-control {
+	width: 700px;
+}
+
 #search-form {
 	width: 300px;
+	float: left;
+	margin-bottom: 30px;
+}
+
+#counter {
+	height: 34px;
+	line-height: 34px;
+	margin-left: 40px;
+}
+
+#pagination-button-group {
+	float: right;
 }
 
 #result-table {
-	width: 700px;
 }
