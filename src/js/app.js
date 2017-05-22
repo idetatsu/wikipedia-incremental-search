@@ -8,25 +8,17 @@ import '../css/app.css';
 export default class App extends Component {
 	constructor(props) {
 		super(props);
-		
 		this.state = {
 			keyword: '',
-			pageNum: 1,
+			page: 1,
 			total: 0,
-			allResults: [],
-			shownResults: [],
+			articles: [],
 		};
-
-		axios.get(`${config.apiEndpoint}/articles`).then((res) => {
-			this.setAllResults(res.data);
-			this.updateShownPage(1);
-		}).catch((err) => {
-			console.log(err);
-		});
+		this.getArticles('', 1);
 	}
 	
 	render() {
-		let indexOfFirstArticle = this.getIndexOfFirstArticle(this.state.pageNum);
+		let indexOfFirstArticle = this.getIndexOfFirstArticle(this.state.page);
 		return(
 			<div id="app">
 				<h1 id="title">Wikipedia Incremental Search</h1>
@@ -42,7 +34,7 @@ export default class App extends Component {
 						<Button onClick={this.moveToPreviousPage.bind(this)}>{'<'}</Button>
 						<Button onClick={this.moveToNextPage.bind(this)}>{'>'}</Button>
 					</ButtonGroup>
-					<ArticleTable articles={this.state.shownResults} pageNum={this.state.pageNum}
+					<ArticleTable articles={this.state.articles} page={this.state.page}
 						indexOfFirstArticle={indexOfFirstArticle} keywordToHighlight={this.state.keyword}/>
 				</div>
 			</div>
@@ -51,47 +43,47 @@ export default class App extends Component {
 
 	onFormChange(e) {
 		this.state.keyword = e.target.value;
-		axios.get(`${config.apiEndpoint}/articles/search`,
-			{params: {keyword: this.state.keyword}}).then((res) => {
-			this.setAllResults(res.data);
-			this.updateShownPage(1);			
+		this.state.page = 1;
+		this.getArticles(this.state.keyword, 1);
+	}
+
+	getIndexOfFirstArticle(page) {
+		return (page - 1) * config.resultsPerPage + 1;
+	}
+
+	getArticles(keyword, page) {
+		if (keyword == null) { keyword = ''; }
+		if (page == null) { page = 1; }
+		let params = {
+			params: {
+				keyword: keyword,
+				page: page,
+			}
+		};
+		axios.get(`${config.apiEndpoint}/articles`, params).then((res) => {
+			console.log(res)
+			this.setState({
+				articles: res.data.articles,
+				total: res.data.total,
+			});
 		}).catch((err) => {
 			console.log(err);
 		});
 	}
 
-	getIndexOfFirstArticle(pageNum) {
-		return (pageNum - 1) * config.resultsPerPage + 1;
-	}
-
-	getResultsForCurrentPage(pageNum) {
-		let indexOfFirstArticle = this.getIndexOfFirstArticle(pageNum);
-		return this.state.allResults.slice(indexOfFirstArticle, indexOfFirstArticle + config.resultsPerPage);
-	}
-
-	setAllResults(allResults) {
-		this.state.allResults = allResults;
-		this.state.total = allResults.length;
-	}
-
-	updateShownPage(pageNum) {
-		this.setState({
-			pageNum: pageNum,
-			shownResults: this.getResultsForCurrentPage(pageNum),
-		});
-	}
-
 	moveToNextPage() {
 		let lastPage = Math.ceil(this.state.total / config.resultsPerPage);
-		if (this.state.pageNum + 1 <= lastPage) {
-			this.updateShownPage(this.state.pageNum+1);
+		if (this.state.page + 1 <= lastPage) {
+			this.state.page += 1;
+			this.getArticles(this.state.keyword, this.state.page);
 		}
 	}
 
 	moveToPreviousPage() {
-		if (this.state.pageNum - 1 >= 1) {
-			this.updateShownPage(this.state.pageNum-1);
-		}	
+		if (this.state.page - 1 >= 1) {
+			this.state.page -= 1;
+			this.getArticles(this.state.keyword, this.state.page);
+		}
 	}
 }
 
