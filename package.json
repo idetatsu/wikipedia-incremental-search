@@ -5,6 +5,8 @@
   "description": "Browser application for Wikipedia incremental search.",
   "main": "index.js",
   "scripts": {
+    "server": "node_modules/.bin/webpack && node_modules/.bin/http-server public",
+    "start": "node_modules/.bin/webpack -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tatsuro Ide",

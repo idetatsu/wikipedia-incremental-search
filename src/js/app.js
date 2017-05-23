@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { FormControl, Table, ButtonGroup, Button } from 'react-bootstrap';
 import axios from 'axios';
 
-import config from './config.js';
+import * as Config from './config';
 import '../css/app.css';
 
 export default class App extends Component {
@@ -14,7 +14,7 @@ export default class App extends Component {
 			total: 0,
 			articles: [],
 		};
-		this.getArticles('', 1);
+		this.getArticles('', 1, Config.RESULTS_PER_PAGE);
 	}
 	
 	render() {
@@ -29,13 +29,13 @@ export default class App extends Component {
 						placeholder="Search by keywords"
 						onChange={this.onFormChange.bind(this)}
 					/>
-					<span id="counter">Showing: {indexOfFirstArticle} - {indexOfFirstArticle + config.resultsPerPage - 1} / {this.state.total}</span>
+					<span id="counter">Showing: {indexOfFirstArticle} - {indexOfFirstArticle + Config.RESULTS_PER_PAGE - 1} / {this.state.total}</span>
 					<ButtonGroup id="pagination-button-group">
 						<Button onClick={this.moveToPreviousPage.bind(this)}>{'<'}</Button>
 						<Button onClick={this.moveToNextPage.bind(this)}>{'>'}</Button>
 					</ButtonGroup>
-					<ArticleTable articles={this.state.articles} page={this.state.page}
-						indexOfFirstArticle={indexOfFirstArticle} keywordToHighlight={this.state.keyword}/>
+					<ArticleTable articles={this.state.articles}
+						indexOfFirstArticle={indexOfFirstArticle}/>
 				</div>
 			</div>
 		);
@@ -44,23 +44,22 @@ export default class App extends Component {
 	onFormChange(e) {
 		this.state.keyword = e.target.value;
 		this.state.page = 1;
-		this.getArticles(this.state.keyword, 1);
+		this.getArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 	}
 
 	getIndexOfFirstArticle(page) {
-		return (page - 1) * config.resultsPerPage + 1;
+		return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 	}
 
-	getArticles(keyword, page) {
-		if (keyword == null) { keyword = ''; }
-		if (page == null) { page = 1; }
+	getArticles(keyword='', page=1, RESULTS_PER_PAGE=10) {
 		let params = {
 			params: {
 				keyword: keyword,
 				page: page,
+				results_per_page: RESULTS_PER_PAGE,
 			}
 		};
-		axios.get(`${config.apiEndpoint}/articles`, params).then((res) => {
+		axios.get(`${Config.API_ENDPOINT}/articles/search`, params).then((res) => {
 			console.log(res)
 			this.setState({
 				articles: res.data.articles,
@@ -72,7 +71,7 @@ export default class App extends Component {
 	}
 
 	moveToNextPage() {
-		let lastPage = Math.ceil(this.state.total / config.resultsPerPage);
+		let lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
 		if (this.state.page + 1 <= lastPage) {
 			this.state.page += 1;
 			this.getArticles(this.state.keyword, this.state.page);

@@ -18121,9 +18121,11 @@ var _axios2 = _interopRequireDefault(_axios);
 
 var _config = __webpack_require__(227);
 
-var _config2 = _interopRequireDefault(_config);
+var Config = _interopRequireWildcard(_config);
 
 __webpack_require__(471);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18147,7 +18149,7 @@ var App = function (_Component) {
 			total: 0,
 			articles: []
 		};
-		_this.getArticles('', 1);
+		_this.getArticles('', 1, Config.RESULTS_PER_PAGE);
 		return _this;
 	}
 
@@ -18178,7 +18180,7 @@ var App = function (_Component) {
 						'Showing: ',
 						indexOfFirstArticle,
 						' - ',
-						indexOfFirstArticle + _config2.default.resultsPerPage - 1,
+						indexOfFirstArticle + Config.RESULTS_PER_PAGE - 1,
 						' / ',
 						this.state.total
 					),
@@ -18196,8 +18198,8 @@ var App = function (_Component) {
 							'>'
 						)
 					),
-					_react2.default.createElement(ArticleTable, { articles: this.state.articles, page: this.state.page,
-						indexOfFirstArticle: indexOfFirstArticle, keywordToHighlight: this.state.keyword })
+					_react2.default.createElement(ArticleTable, { articles: this.state.articles,
+						indexOfFirstArticle: indexOfFirstArticle })
 				)
 			);
 		}
@@ -18206,31 +18208,31 @@ var App = function (_Component) {
 		value: function onFormChange(e) {
 			this.state.keyword = e.target.value;
 			this.state.page = 1;
-			this.getArticles(this.state.keyword, 1);
+			this.getArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 		}
 	}, {
 		key: 'getIndexOfFirstArticle',
 		value: function getIndexOfFirstArticle(page) {
-			return (page - 1) * _config2.default.resultsPerPage + 1;
+			return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 		}
 	}, {
 		key: 'getArticles',
-		value: function getArticles(keyword, page) {
+		value: function getArticles() {
+			var keyword = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
 			var _this2 = this;
 
-			if (keyword == null) {
-				keyword = '';
-			}
-			if (page == null) {
-				page = 1;
-			}
+			var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+			var RESULTS_PER_PAGE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10;
+
 			var params = {
 				params: {
 					keyword: keyword,
-					page: page
+					page: page,
+					results_per_page: RESULTS_PER_PAGE
 				}
 			};
-			_axios2.default.get(_config2.default.apiEndpoint + '/articles', params).then(function (res) {
+			_axios2.default.get(Config.API_ENDPOINT + '/articles/search', params).then(function (res) {
 				console.log(res);
 				_this2.setState({
 					articles: res.data.articles,
@@ -18243,7 +18245,7 @@ var App = function (_Component) {
 	}, {
 		key: 'moveToNextPage',
 		value: function moveToNextPage() {
-			var lastPage = Math.ceil(this.state.total / _config2.default.resultsPerPage);
+			var lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
 			if (this.state.page + 1 <= lastPage) {
 				this.state.page += 1;
 				this.getArticles(this.state.keyword, this.state.page);
@@ -19188,12 +19190,11 @@ module.exports = function spread(callback) {
 "use strict";
 
 
-var config = {
-	resultsPerPage: 10,
-	apiEndpoint: 'http://localhost:3000'
-};
-
-module.exports = config;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var RESULTS_PER_PAGE = exports.RESULTS_PER_PAGE = 10;
+var API_ENDPOINT = exports.API_ENDPOINT = 'http://localhost:3000';
 
 /***/ }),
 /* 228 */
