@@ -18,7 +18,7 @@ export default class App extends Component {
 	}
 	
 	render() {
-		let indexOfFirstArticle = this.getIndexOfFirstArticle(this.state.page);
+		let firstArticleIndex = this.getFirstArticleIndex(this.state.page);
 		return(
 			<div id="app">
 				<h1 id="title">Wikipedia Incremental Search</h1>
@@ -29,13 +29,13 @@ export default class App extends Component {
 						placeholder="Search by keywords"
 						onChange={this.onFormChange.bind(this)}
 					/>
-					<span id="counter">Showing: {indexOfFirstArticle} - {indexOfFirstArticle + Config.RESULTS_PER_PAGE - 1} / {this.state.total}</span>
+					<span id="counter">Showing: {firstArticleIndex} - {firstArticleIndex + Config.RESULTS_PER_PAGE - 1} / {this.state.total}</span>
 					<ButtonGroup id="pagination-button-group">
 						<Button onClick={this.moveToPreviousPage.bind(this)}>{'<'}</Button>
 						<Button onClick={this.moveToNextPage.bind(this)}>{'>'}</Button>
 					</ButtonGroup>
 					<ArticleTable articles={this.state.articles}
-						indexOfFirstArticle={indexOfFirstArticle}/>
+						firstArticleIndex={firstArticleIndex}/>
 				</div>
 			</div>
 		);
@@ -47,16 +47,16 @@ export default class App extends Component {
 		this.getArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 	}
 
-	getIndexOfFirstArticle(page) {
+	getFirstArticleIndex(page) {
 		return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 	}
 
-	getArticles(keyword='', page=1, RESULTS_PER_PAGE=10) {
+	getArticles(keyword='', page=1, resultsPerPage=10) {
 		let params = {
 			params: {
 				keyword: keyword,
 				page: page,
-				results_per_page: RESULTS_PER_PAGE,
+				results_per_page: resultsPerPage,
 			}
 		};
 		axios.get(`${Config.API_ENDPOINT}/articles/search`, params).then((res) => {
@@ -91,10 +91,10 @@ class ArticleTable extends Component {
 		let articleTableRows = this.props.articles.map((article, index) => {
 			return (
 				<tr key={index}>
-					<td>{this.props.indexOfFirstArticle+index}.</td>
+					<td>{this.props.firstArticleIndex+index}.</td>
 					<td>
-						<a href={article.url} target="_blank">{article.title}</a>
-						<p>{article.abstract}</p>
+						<a href={article.url} target="_blank" dangerouslySetInnerHTML={{__html: article.title}}/>
+						<p dangerouslySetInnerHTML={{__html: article.abstract}}/>
 					</td>
 				</tr>
 			);

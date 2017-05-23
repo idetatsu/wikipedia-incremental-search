@@ -18156,7 +18156,7 @@ var App = function (_Component) {
 	_createClass(App, [{
 		key: 'render',
 		value: function render() {
-			var indexOfFirstArticle = this.getIndexOfFirstArticle(this.state.page);
+			var firstArticleIndex = this.getFirstArticleIndex(this.state.page);
 			return _react2.default.createElement(
 				'div',
 				{ id: 'app' },
@@ -18178,9 +18178,9 @@ var App = function (_Component) {
 						'span',
 						{ id: 'counter' },
 						'Showing: ',
-						indexOfFirstArticle,
+						firstArticleIndex,
 						' - ',
-						indexOfFirstArticle + Config.RESULTS_PER_PAGE - 1,
+						firstArticleIndex + Config.RESULTS_PER_PAGE - 1,
 						' / ',
 						this.state.total
 					),
@@ -18199,7 +18199,7 @@ var App = function (_Component) {
 						)
 					),
 					_react2.default.createElement(ArticleTable, { articles: this.state.articles,
-						indexOfFirstArticle: indexOfFirstArticle })
+						firstArticleIndex: firstArticleIndex })
 				)
 			);
 		}
@@ -18211,8 +18211,8 @@ var App = function (_Component) {
 			this.getArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 		}
 	}, {
-		key: 'getIndexOfFirstArticle',
-		value: function getIndexOfFirstArticle(page) {
+		key: 'getFirstArticleIndex',
+		value: function getFirstArticleIndex(page) {
 			return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 		}
 	}, {
@@ -18223,13 +18223,13 @@ var App = function (_Component) {
 			var _this2 = this;
 
 			var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-			var RESULTS_PER_PAGE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10;
+			var resultsPerPage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10;
 
 			var params = {
 				params: {
 					keyword: keyword,
 					page: page,
-					results_per_page: RESULTS_PER_PAGE
+					results_per_page: resultsPerPage
 				}
 			};
 			_axios2.default.get(Config.API_ENDPOINT + '/articles/search', params).then(function (res) {
@@ -18287,22 +18287,14 @@ var ArticleTable = function (_Component2) {
 					_react2.default.createElement(
 						'td',
 						null,
-						_this4.props.indexOfFirstArticle + index,
+						_this4.props.firstArticleIndex + index,
 						'.'
 					),
 					_react2.default.createElement(
 						'td',
 						null,
-						_react2.default.createElement(
-							'a',
-							{ href: article.url, target: '_blank' },
-							article.title
-						),
-						_react2.default.createElement(
-							'p',
-							null,
-							article.abstract
-						)
+						_react2.default.createElement('a', { href: article.url, target: '_blank', dangerouslySetInnerHTML: { __html: article.title } }),
+						_react2.default.createElement('p', { dangerouslySetInnerHTML: { __html: article.abstract } })
 					)
 				);
 			});
@@ -22106,7 +22098,7 @@ exports = module.exports = __webpack_require__(280)(undefined);
 
 
 // module
-exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-control {\n\twidth: 700px;\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\n#result-table {\n}", ""]);
+exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-control {\n\twidth: 700px;\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\n#result-table {\n}\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
 
 // exports
 
