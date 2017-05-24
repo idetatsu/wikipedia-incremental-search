@@ -24,7 +24,7 @@ export default class App extends Component {
 		// asynchronous data fetching.
 		this.searchArticles('', 1, Config.RESULTS_PER_PAGE);
 		this.updateSearches();
-		// polling.
+		// activate polling.
 		const intervalId = setInterval(this.updateSearches.bind(this), Config.UPDATE_SEARCHES_INTERVAL * 1000);
 		this.setState({
 			updateSearchesIntervalId: intervalId,
@@ -37,7 +37,8 @@ export default class App extends Component {
 	}
 	
 	render() {
-		const firstArticleIndex = this.getFirstArticleIndex(this.state.page);
+		const firstArticleIndex = (this.state.page - 1) * Config.RESULTS_PER_PAGE + 1;
+		const lastArticleIndex = Math.min(firstArticleIndex + Config.RESULTS_PER_PAGE - 1, this.state.total);
 		return(
 			<div id="app">
 				<Col sm={12} md={12} lg={12}>
@@ -47,15 +48,15 @@ export default class App extends Component {
 					<div id="search-control">
 						<FormControl
 							id="search-form"
+							value={this.state.keyword}
 							type="text"
 							placeholder="Search by keywords"
 							onChange={this.onFormChange.bind(this)}
-							onKeyPress={this.onFormKeyPress.bind(this)}
 						/>
-						<span id="counter">Showing: {firstArticleIndex} - {firstArticleIndex + Config.RESULTS_PER_PAGE - 1} / {this.state.total}</span>
+						<span id="counter">Showing: {firstArticleIndex} - {lastArticleIndex} / {this.state.total}</span>
 						<ButtonGroup id="pagination-button-group">
-							<Button onClick={this.moveToPreviousPage.bind(this)}>{'<'}</Button>
-							<Button onClick={this.moveToNextPage.bind(this)}>{'>'}</Button>
+							<Button onClick={this.goToPreviousPage.bind(this)}>{'<'}</Button>
+							<Button onClick={this.goToNextPage.bind(this)}>{'>'}</Button>
 						</ButtonGroup>
 						<ArticleTable articles={this.state.articles}
 							firstArticleIndex={firstArticleIndex}/>
@@ -89,19 +90,24 @@ export default class App extends Component {
 		this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 	}
 
-	onFormKeyPress(e) {
-		if (e.charCode == 13) {
-			// Enter pressed
-		}	
+	goToNextPage() {
+		const lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
+		if (this.state.page + 1 <= lastPage) {
+			this.state.page += 1;
+			this.searchArticles(this.state.keyword, this.state.page);
+		}
+	}
+
+	goToPreviousPage() {
+		if (this.state.page - 1 >= 1) {
+			this.state.page -= 1;
+			this.searchArticles(this.state.keyword, this.state.page);
+		}
 	}
 
 	handleSearchHistoryClick(keyword) {
-		this.searchArticles(keyword);
+		this.searchArticles(keyword, 1, Config.RESULTS_PER_PAGE);
 		this.createSearch(keyword);
-	}
-
-	getFirstArticleIndex(page) {
-		return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 	}
 
 	searchArticles(keyword='', page=1, resultsPerPage=10) {
@@ -117,6 +123,8 @@ export default class App extends Component {
 			this.setState({
 				articles: res.data.articles,
 				total: res.data.total,
+				page: page,
+				keyword: keyword,
 			});
 		}).catch((err) => {
 			console.log(err);
@@ -145,21 +153,6 @@ export default class App extends Component {
 		}).catch((err) => {
 			console.log(err);
 		});
-	}
-
-	moveToNextPage() {
-		const lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
-		if (this.state.page + 1 <= lastPage) {
-			this.state.page += 1;
-			this.searchArticles(this.state.keyword, this.state.page);
-		}
-	}
-
-	moveToPreviousPage() {
-		if (this.state.page - 1 >= 1) {
-			this.state.page -= 1;
-			this.searchArticles(this.state.keyword, this.state.page);
-		}
 	}
 }
 

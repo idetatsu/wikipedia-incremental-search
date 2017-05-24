@@ -7,9 +7,6 @@
 	margin: 30px 0px;
 }
 
-#search-control {
-}
-
 #search-form {
 	width: 300px;
 	float: left;
@@ -25,10 +22,6 @@
 #pagination-button-group {
 	float: right;
 }
-
-#search-history-panel {
-}
-
 
 mark {
 	background-color: yellow;

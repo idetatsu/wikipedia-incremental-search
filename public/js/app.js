@@ -18161,7 +18161,7 @@ var App = function (_Component) {
 			// asynchronous data fetching.
 			this.searchArticles('', 1, Config.RESULTS_PER_PAGE);
 			this.updateSearches();
-			// polling.
+			// activate polling.
 			var intervalId = setInterval(this.updateSearches.bind(this), Config.UPDATE_SEARCHES_INTERVAL * 1000);
 			this.setState({
 				updateSearchesIntervalId: intervalId
@@ -18176,7 +18176,8 @@ var App = function (_Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var firstArticleIndex = this.getFirstArticleIndex(this.state.page);
+			var firstArticleIndex = (this.state.page - 1) * Config.RESULTS_PER_PAGE + 1;
+			var lastArticleIndex = Math.min(firstArticleIndex + Config.RESULTS_PER_PAGE - 1, this.state.total);
 			return _react2.default.createElement(
 				'div',
 				{ id: 'app' },
@@ -18197,10 +18198,10 @@ var App = function (_Component) {
 						{ id: 'search-control' },
 						_react2.default.createElement(_reactBootstrap.FormControl, {
 							id: 'search-form',
+							value: this.state.keyword,
 							type: 'text',
 							placeholder: 'Search by keywords',
-							onChange: this.onFormChange.bind(this),
-							onKeyPress: this.onFormKeyPress.bind(this)
+							onChange: this.onFormChange.bind(this)
 						}),
 						_react2.default.createElement(
 							'span',
@@ -18208,7 +18209,7 @@ var App = function (_Component) {
 							'Showing: ',
 							firstArticleIndex,
 							' - ',
-							firstArticleIndex + Config.RESULTS_PER_PAGE - 1,
+							lastArticleIndex,
 							' / ',
 							this.state.total
 						),
@@ -18217,12 +18218,12 @@ var App = function (_Component) {
 							{ id: 'pagination-button-group' },
 							_react2.default.createElement(
 								_reactBootstrap.Button,
-								{ onClick: this.moveToPreviousPage.bind(this) },
+								{ onClick: this.goToPreviousPage.bind(this) },
 								'<'
 							),
 							_react2.default.createElement(
 								_reactBootstrap.Button,
-								{ onClick: this.moveToNextPage.bind(this) },
+								{ onClick: this.goToNextPage.bind(this) },
 								'>'
 							)
 						),
@@ -18262,22 +18263,27 @@ var App = function (_Component) {
 			this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 		}
 	}, {
-		key: 'onFormKeyPress',
-		value: function onFormKeyPress(e) {
-			if (e.charCode == 13) {
-				// Enter pressed
+		key: 'goToNextPage',
+		value: function goToNextPage() {
+			var lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
+			if (this.state.page + 1 <= lastPage) {
+				this.state.page += 1;
+				this.searchArticles(this.state.keyword, this.state.page);
+			}
+		}
+	}, {
+		key: 'goToPreviousPage',
+		value: function goToPreviousPage() {
+			if (this.state.page - 1 >= 1) {
+				this.state.page -= 1;
+				this.searchArticles(this.state.keyword, this.state.page);
 			}
 		}
 	}, {
 		key: 'handleSearchHistoryClick',
 		value: function handleSearchHistoryClick(keyword) {
-			this.searchArticles(keyword);
+			this.searchArticles(keyword, 1, Config.RESULTS_PER_PAGE);
 			this.createSearch(keyword);
-		}
-	}, {
-		key: 'getFirstArticleIndex',
-		value: function getFirstArticleIndex(page) {
-			return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 		}
 	}, {
 		key: 'searchArticles',
@@ -18300,7 +18306,9 @@ var App = function (_Component) {
 				console.log(res);
 				_this3.setState({
 					articles: res.data.articles,
-					total: res.data.total
+					total: res.data.total,
+					page: page,
+					keyword: keyword
 				});
 			}).catch(function (err) {
 				console.log(err);
@@ -18333,23 +18341,6 @@ var App = function (_Component) {
 			}).catch(function (err) {
 				console.log(err);
 			});
-		}
-	}, {
-		key: 'moveToNextPage',
-		value: function moveToNextPage() {
-			var lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
-			if (this.state.page + 1 <= lastPage) {
-				this.state.page += 1;
-				this.searchArticles(this.state.keyword, this.state.page);
-			}
-		}
-	}, {
-		key: 'moveToPreviousPage',
-		value: function moveToPreviousPage() {
-			if (this.state.page - 1 >= 1) {
-				this.state.page -= 1;
-				this.searchArticles(this.state.keyword, this.state.page);
-			}
 		}
 	}]);
 
@@ -22236,7 +22227,7 @@ exports = module.exports = __webpack_require__(280)(undefined);
 
 
 // module
-exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-control {\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\n#search-history-panel {\n}\n\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
+exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
 
 // exports
 
