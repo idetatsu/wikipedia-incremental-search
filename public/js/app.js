@@ -18147,13 +18147,33 @@ var App = function (_Component) {
 			keyword: '',
 			page: 1,
 			total: 0,
-			articles: []
+			articles: [],
+			searches: [],
+			updateSearchesIntervalId: null,
+			createSearchTimeoutId: null
 		};
-		_this.getArticles('', 1, Config.RESULTS_PER_PAGE);
 		return _this;
 	}
 
 	_createClass(App, [{
+		key: 'componentDidMount',
+		value: function componentDidMount() {
+			// asynchronous data fetching.
+			this.searchArticles('', 1, Config.RESULTS_PER_PAGE);
+			this.updateSearches();
+			// polling.
+			var intervalId = setInterval(this.updateSearches.bind(this), Config.UPDATE_SEARCHES_INTERVAL * 1000);
+			this.setState({
+				updateSearchesIntervalId: intervalId
+			});
+		}
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			// clear polling.
+			clearInterval(this.state.updateSearchesIntervalId);
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			var firstArticleIndex = this.getFirstArticleIndex(this.state.page);
@@ -18161,54 +18181,98 @@ var App = function (_Component) {
 				'div',
 				{ id: 'app' },
 				_react2.default.createElement(
-					'h1',
-					{ id: 'title' },
-					'Wikipedia Incremental Search'
+					_reactBootstrap.Col,
+					{ sm: 12, md: 12, lg: 12 },
+					_react2.default.createElement(
+						'h1',
+						{ id: 'title' },
+						'Wikipedia Incremental Search'
+					)
 				),
 				_react2.default.createElement(
-					'div',
-					{ id: 'search-control' },
-					_react2.default.createElement(_reactBootstrap.FormControl, {
-						id: 'search-form',
-						type: 'text',
-						placeholder: 'Search by keywords',
-						onChange: this.onFormChange.bind(this)
-					}),
+					_reactBootstrap.Col,
+					{ sm: 12, md: 8, lg: 8 },
 					_react2.default.createElement(
-						'span',
-						{ id: 'counter' },
-						'Showing: ',
-						firstArticleIndex,
-						' - ',
-						firstArticleIndex + Config.RESULTS_PER_PAGE - 1,
-						' / ',
-						this.state.total
-					),
-					_react2.default.createElement(
-						_reactBootstrap.ButtonGroup,
-						{ id: 'pagination-button-group' },
+						'div',
+						{ id: 'search-control' },
+						_react2.default.createElement(_reactBootstrap.FormControl, {
+							id: 'search-form',
+							type: 'text',
+							placeholder: 'Search by keywords',
+							onChange: this.onFormChange.bind(this),
+							onKeyPress: this.onFormKeyPress.bind(this)
+						}),
 						_react2.default.createElement(
-							_reactBootstrap.Button,
-							{ onClick: this.moveToPreviousPage.bind(this) },
-							'<'
+							'span',
+							{ id: 'counter' },
+							'Showing: ',
+							firstArticleIndex,
+							' - ',
+							firstArticleIndex + Config.RESULTS_PER_PAGE - 1,
+							' / ',
+							this.state.total
 						),
 						_react2.default.createElement(
-							_reactBootstrap.Button,
-							{ onClick: this.moveToNextPage.bind(this) },
-							'>'
-						)
-					),
-					_react2.default.createElement(ArticleTable, { articles: this.state.articles,
-						firstArticleIndex: firstArticleIndex })
+							_reactBootstrap.ButtonGroup,
+							{ id: 'pagination-button-group' },
+							_react2.default.createElement(
+								_reactBootstrap.Button,
+								{ onClick: this.moveToPreviousPage.bind(this) },
+								'<'
+							),
+							_react2.default.createElement(
+								_reactBootstrap.Button,
+								{ onClick: this.moveToNextPage.bind(this) },
+								'>'
+							)
+						),
+						_react2.default.createElement(ArticleTable, { articles: this.state.articles,
+							firstArticleIndex: firstArticleIndex })
+					)
+				),
+				_react2.default.createElement(
+					_reactBootstrap.Col,
+					{ sm: 12, md: 4, lg: 4 },
+					_react2.default.createElement(SearchHistoryPanel, { searches: this.state.searches,
+						onSearchHistoryClick: this.handleSearchHistoryClick.bind(this) })
 				)
 			);
 		}
 	}, {
 		key: 'onFormChange',
 		value: function onFormChange(e) {
+			var _this2 = this;
+
 			this.state.keyword = e.target.value;
 			this.state.page = 1;
-			this.getArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
+
+			if (this.state.createSearchTimeoutId != null) {
+				clearTimeout(this.state.createSearchTimeoutId);
+			}
+			// If the keyword is not empty, set timeout for createSearch function.
+			if (this.state.keyword != '') {
+				var timeoutId = setTimeout(function () {
+					_this2.createSearch(_this2.state.keyword);
+				}, Config.CREATE_SEARCH_WAIT_THRESHOLD * 1000);
+				this.setState({
+					createSearchTimeoutId: timeoutId
+				});
+			}
+
+			this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
+		}
+	}, {
+		key: 'onFormKeyPress',
+		value: function onFormKeyPress(e) {
+			if (e.charCode == 13) {
+				// Enter pressed
+			}
+		}
+	}, {
+		key: 'handleSearchHistoryClick',
+		value: function handleSearchHistoryClick(keyword) {
+			this.searchArticles(keyword);
+			this.createSearch(keyword);
 		}
 	}, {
 		key: 'getFirstArticleIndex',
@@ -18216,11 +18280,11 @@ var App = function (_Component) {
 			return (page - 1) * Config.RESULTS_PER_PAGE + 1;
 		}
 	}, {
-		key: 'getArticles',
-		value: function getArticles() {
+		key: 'searchArticles',
+		value: function searchArticles() {
 			var keyword = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 
-			var _this2 = this;
+			var _this3 = this;
 
 			var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 			var resultsPerPage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 10;
@@ -18234,9 +18298,37 @@ var App = function (_Component) {
 			};
 			_axios2.default.get(Config.API_ENDPOINT + '/articles/search', params).then(function (res) {
 				console.log(res);
-				_this2.setState({
+				_this3.setState({
 					articles: res.data.articles,
 					total: res.data.total
+				});
+			}).catch(function (err) {
+				console.log(err);
+			});
+		}
+	}, {
+		key: 'createSearch',
+		value: function createSearch(keyword) {
+			var params = {
+				search: {
+					keyword: keyword
+				}
+			};
+			_axios2.default.post(Config.API_ENDPOINT + '/searches', params).then(function (res) {
+				// Successfully created a new search.
+			}).catch(function (err) {
+				console.log(err);
+			});
+		}
+	}, {
+		key: 'updateSearches',
+		value: function updateSearches() {
+			var _this4 = this;
+
+			_axios2.default.get(Config.API_ENDPOINT + '/searches/latest').then(function (res) {
+				console.log(res);
+				_this4.setState({
+					searches: res.data
 				});
 			}).catch(function (err) {
 				console.log(err);
@@ -18248,7 +18340,7 @@ var App = function (_Component) {
 			var lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
 			if (this.state.page + 1 <= lastPage) {
 				this.state.page += 1;
-				this.getArticles(this.state.keyword, this.state.page);
+				this.searchArticles(this.state.keyword, this.state.page);
 			}
 		}
 	}, {
@@ -18256,7 +18348,7 @@ var App = function (_Component) {
 		value: function moveToPreviousPage() {
 			if (this.state.page - 1 >= 1) {
 				this.state.page -= 1;
-				this.getArticles(this.state.keyword, this.state.page);
+				this.searchArticles(this.state.keyword, this.state.page);
 			}
 		}
 	}]);
@@ -18266,8 +18358,52 @@ var App = function (_Component) {
 
 exports.default = App;
 
-var ArticleTable = function (_Component2) {
-	_inherits(ArticleTable, _Component2);
+var SearchHistoryPanel = function (_Component2) {
+	_inherits(SearchHistoryPanel, _Component2);
+
+	function SearchHistoryPanel() {
+		_classCallCheck(this, SearchHistoryPanel);
+
+		return _possibleConstructorReturn(this, (SearchHistoryPanel.__proto__ || Object.getPrototypeOf(SearchHistoryPanel)).apply(this, arguments));
+	}
+
+	_createClass(SearchHistoryPanel, [{
+		key: 'render',
+		value: function render() {
+			var _this6 = this;
+
+			var listGrounpItems = this.props.searches.map(function (search, index) {
+				return _react2.default.createElement(
+					_reactBootstrap.ListGroupItem,
+					{ key: index, onClick: function onClick() {
+							_this6.props.onSearchHistoryClick(search.keyword, 1);
+						} },
+					search.keyword,
+					' ',
+					search.frequency
+				);
+			});
+			return _react2.default.createElement(
+				'div',
+				{ id: 'search-history-panel' },
+				_react2.default.createElement(
+					_reactBootstrap.Panel,
+					{ header: 'Search History', bsStyle: 'primary' },
+					_react2.default.createElement(
+						_reactBootstrap.ListGroup,
+						{ fill: true },
+						listGrounpItems
+					)
+				)
+			);
+		}
+	}]);
+
+	return SearchHistoryPanel;
+}(_react.Component);
+
+var ArticleTable = function (_Component3) {
+	_inherits(ArticleTable, _Component3);
 
 	function ArticleTable() {
 		_classCallCheck(this, ArticleTable);
@@ -18278,7 +18414,7 @@ var ArticleTable = function (_Component2) {
 	_createClass(ArticleTable, [{
 		key: 'render',
 		value: function render() {
-			var _this4 = this;
+			var _this8 = this;
 
 			var articleTableRows = this.props.articles.map(function (article, index) {
 				return _react2.default.createElement(
@@ -18287,7 +18423,7 @@ var ArticleTable = function (_Component2) {
 					_react2.default.createElement(
 						'td',
 						null,
-						_this4.props.firstArticleIndex + index,
+						_this8.props.firstArticleIndex + index,
 						'.'
 					),
 					_react2.default.createElement(
@@ -19187,6 +19323,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 var RESULTS_PER_PAGE = exports.RESULTS_PER_PAGE = 10;
 var API_ENDPOINT = exports.API_ENDPOINT = 'http://localhost:3000';
+var CREATE_SEARCH_WAIT_THRESHOLD = exports.CREATE_SEARCH_WAIT_THRESHOLD = 2;
+var UPDATE_SEARCHES_INTERVAL = exports.UPDATE_SEARCHES_INTERVAL = 2;
 
 /***/ }),
 /* 228 */
@@ -22098,7 +22236,7 @@ exports = module.exports = __webpack_require__(280)(undefined);
 
 
 // module
-exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-control {\n\twidth: 700px;\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\n#result-table {\n}\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
+exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-control {\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\n#search-history-panel {\n}\n\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
 
 // exports
 

@@ -8,7 +8,6 @@
 }
 
 #search-control {
-	width: 700px;
 }
 
 #search-form {
@@ -27,8 +26,9 @@
 	float: right;
 }
 
-#result-table {
+#search-history-panel {
 }
+
 
 mark {
 	background-color: yellow;
