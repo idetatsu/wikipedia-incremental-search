@@ -18218,12 +18218,14 @@ var App = function (_Component) {
 							{ id: 'pagination-button-group' },
 							_react2.default.createElement(
 								_reactBootstrap.Button,
-								{ onClick: this.goToPreviousPage.bind(this) },
+								{ onClick: this.goToPreviousPage.bind(this),
+									disabled: this.isAtFirstPage() },
 								'<'
 							),
 							_react2.default.createElement(
 								_reactBootstrap.Button,
-								{ onClick: this.goToNextPage.bind(this) },
+								{ onClick: this.goToNextPage.bind(this),
+									disabled: this.isAtLastPage() },
 								'>'
 							)
 						),
@@ -18236,6 +18238,16 @@ var App = function (_Component) {
 					{ sm: 12, md: 4, lg: 4 },
 					_react2.default.createElement(SearchHistoryPanel, { searches: this.state.searches,
 						onSearchHistoryClick: this.handleSearchHistoryClick.bind(this) })
+				),
+				_react2.default.createElement(
+					_reactBootstrap.Col,
+					{ sm: 12, md: 12, lg: 12 },
+					_react2.default.createElement('hr', null),
+					_react2.default.createElement(
+						'span',
+						{ id: 'footer' },
+						'Wikipedia Incremental Search'
+					)
 				)
 			);
 		}
@@ -18263,10 +18275,27 @@ var App = function (_Component) {
 			this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 		}
 	}, {
+		key: 'isAtFirstPage',
+		value: function isAtFirstPage() {
+			if (this.state.page == 1) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}, {
+		key: 'isAtLastPage',
+		value: function isAtLastPage() {
+			if (this.state.page * Config.RESULTS_PER_PAGE >= this.state.total) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}, {
 		key: 'goToNextPage',
 		value: function goToNextPage() {
-			var lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
-			if (this.state.page + 1 <= lastPage) {
+			if (!this.isAtLastPage()) {
 				this.state.page += 1;
 				this.searchArticles(this.state.keyword, this.state.page);
 			}
@@ -18274,7 +18303,7 @@ var App = function (_Component) {
 	}, {
 		key: 'goToPreviousPage',
 		value: function goToPreviousPage() {
-			if (this.state.page - 1 >= 1) {
+			if (!this.isAtFirstPage()) {
 				this.state.page -= 1;
 				this.searchArticles(this.state.keyword, this.state.page);
 			}

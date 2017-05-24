@@ -55,8 +55,10 @@ export default class App extends Component {
 						/>
 						<span id="counter">Showing: {firstArticleIndex} - {lastArticleIndex} / {this.state.total}</span>
 						<ButtonGroup id="pagination-button-group">
-							<Button onClick={this.goToPreviousPage.bind(this)}>{'<'}</Button>
-							<Button onClick={this.goToNextPage.bind(this)}>{'>'}</Button>
+							<Button onClick={this.goToPreviousPage.bind(this)}
+								disabled={this.isAtFirstPage()}>{'<'}</Button>
+							<Button onClick={this.goToNextPage.bind(this)}
+								disabled={this.isAtLastPage()}>{'>'}</Button>
 						</ButtonGroup>
 						<ArticleTable articles={this.state.articles}
 							firstArticleIndex={firstArticleIndex}/>
@@ -65,6 +67,10 @@ export default class App extends Component {
 				<Col sm={12} md={4} lg={4}>
 					<SearchHistoryPanel searches={this.state.searches}
 						onSearchHistoryClick={this.handleSearchHistoryClick.bind(this)}/>
+				</Col>
+				<Col sm={12} md={12} lg={12}>
+					<hr />
+					<span id="footer">Wikipedia Incremental Search</span>
 				</Col>
 			</div>
 		);
@@ -90,16 +96,31 @@ export default class App extends Component {
 		this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 	}
 
+	isAtFirstPage() {
+		if (this.state.page == 1) {
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	isAtLastPage() {
+		if (this.state.page * Config.RESULTS_PER_PAGE >= this.state.total) {
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 	goToNextPage() {
-		const lastPage = Math.ceil(this.state.total / Config.RESULTS_PER_PAGE);
-		if (this.state.page + 1 <= lastPage) {
+		if (!this.isAtLastPage()) {
 			this.state.page += 1;
 			this.searchArticles(this.state.keyword, this.state.page);
 		}
 	}
 
 	goToPreviousPage() {
-		if (this.state.page - 1 >= 1) {
+		if (!this.isAtFirstPage()) {
 			this.state.page -= 1;
 			this.searchArticles(this.state.keyword, this.state.page);
 		}
