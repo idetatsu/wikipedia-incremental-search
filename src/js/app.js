@@ -69,8 +69,12 @@ export default class App extends Component {
 						onSearchHistoryClick={this.handleSearchHistoryClick.bind(this)}/>
 				</Col>
 				<Col sm={12} md={12} lg={12}>
-					<hr />
-					<span id="footer">Wikipedia Incremental Search</span>
+					<div id="footer">
+						<hr />
+						<a id="github-backend-link" href="https://github.com/idetatsu/wikipedia-incremental-search-api-server">View Backend Code</a><br/>
+						<a id="github-frontend-link" href="https://github.com/idetatsu/wikipedia-incremental-search">View Frontend Code</a><br/>
+						<span><a href="http://blog.theoroy.com">Theoroy</a> &copy; 2017 &bull; All rights reserved.</span>
+					</div>
 				</Col>
 			</div>
 		);

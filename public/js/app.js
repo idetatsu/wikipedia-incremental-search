@@ -18242,11 +18242,32 @@ var App = function (_Component) {
 				_react2.default.createElement(
 					_reactBootstrap.Col,
 					{ sm: 12, md: 12, lg: 12 },
-					_react2.default.createElement('hr', null),
 					_react2.default.createElement(
-						'span',
+						'div',
 						{ id: 'footer' },
-						'Wikipedia Incremental Search'
+						_react2.default.createElement('hr', null),
+						_react2.default.createElement(
+							'a',
+							{ id: 'github-backend-link', href: 'https://github.com/idetatsu/wikipedia-incremental-search-api-server' },
+							'View Backend Code'
+						),
+						_react2.default.createElement('br', null),
+						_react2.default.createElement(
+							'a',
+							{ id: 'github-frontend-link', href: 'https://github.com/idetatsu/wikipedia-incremental-search' },
+							'View Frontend Code'
+						),
+						_react2.default.createElement('br', null),
+						_react2.default.createElement(
+							'span',
+							null,
+							_react2.default.createElement(
+								'a',
+								{ href: 'http://blog.theoroy.com' },
+								'Theoroy'
+							),
+							' \xA9 2017 \u2022 All rights reserved.'
+						)
 					)
 				)
 			);
@@ -22256,7 +22277,7 @@ exports = module.exports = __webpack_require__(280)(undefined);
 
 
 // module
-exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
+exports.push([module.i, "#app {\n\twidth: 1000px;\n\tmargin: auto;\n}\n\n#title {\n\tmargin: 30px 0px;\n}\n\n#search-form {\n\twidth: 300px;\n\tfloat: left;\n\tmargin-bottom: 30px;\n}\n\n#counter {\n\theight: 34px;\n\tline-height: 34px;\n\tmargin-left: 40px;\n}\n\n#pagination-button-group {\n\tfloat: right;\n}\n\n#footer {\n\ttext-align: center;\n}\n\nmark {\n\tbackground-color: yellow;\n}", ""]);
 
 // exports
 

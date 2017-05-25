@@ -23,6 +23,10 @@
 	float: right;
 }
 
+#footer {
+	text-align: center;
+}
+
 mark {
 	background-color: yellow;
 }
