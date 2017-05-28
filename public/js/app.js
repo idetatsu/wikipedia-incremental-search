@@ -18277,8 +18277,10 @@ var App = function (_Component) {
 		value: function onFormChange(e) {
 			var _this2 = this;
 
-			this.state.keyword = e.target.value;
+			var keyword = e.target.value;
+			this.state.keyword = keyword;
 			this.state.page = 1;
+			this.searchArticles(keyword, 1, Config.RESULTS_PER_PAGE);
 
 			if (this.state.createSearchTimeoutId != null) {
 				clearTimeout(this.state.createSearchTimeoutId);
@@ -18286,14 +18288,12 @@ var App = function (_Component) {
 			// If the keyword is not empty, set timeout for createSearch function.
 			if (this.state.keyword != '') {
 				var timeoutId = setTimeout(function () {
-					_this2.createSearch(_this2.state.keyword);
+					_this2.createSearch(keyword);
 				}, Config.CREATE_SEARCH_WAIT_THRESHOLD * 1000);
 				this.setState({
 					createSearchTimeoutId: timeoutId
 				});
 			}
-
-			this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
 		}
 	}, {
 		key: 'isAtFirstPage',
@@ -18353,13 +18353,15 @@ var App = function (_Component) {
 				}
 			};
 			_axios2.default.get(Config.API_ENDPOINT + '/articles/search', params).then(function (res) {
-				console.log(res);
-				_this3.setState({
-					articles: res.data.articles,
-					total: res.data.total,
-					page: page,
-					keyword: keyword
-				});
+				// console.log(res);
+				// You don't necessarily get results for the latest keyword! so check it before updating the state..
+				if (res.data.keyword == _this3.state.keyword) {
+					_this3.setState({
+						articles: res.data.articles,
+						total: res.data.total,
+						page: page
+					});
+				}
 			}).catch(function (err) {
 				console.log(err);
 			});

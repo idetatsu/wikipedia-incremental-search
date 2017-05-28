@@ -7,35 +7,35 @@ import * as Config from './config';
 import '../css/app.css';
 
 export default class App extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			keyword: '',
-			page: 1,
-			total: 0,
-			articles: [],
-			searches: [],
-			updateSearchesIntervalId: null,
-			createSearchTimeoutId: null,
-		};
-	}
+  constructor(props) {
+    super(props);
+    this.state = {
+      keyword: '',
+      page: 1,
+      total: 0,
+      articles: [],
+      searches: [],
+      updateSearchesIntervalId: null,
+      createSearchTimeoutId: null,
+    };
+  }
 
-	componentDidMount() {
-		// asynchronous data fetching.
-		this.searchArticles('', 1, Config.RESULTS_PER_PAGE);
-		this.updateSearches();
-		// activate polling.
-		const intervalId = setInterval(this.updateSearches.bind(this), Config.UPDATE_SEARCHES_INTERVAL * 1000);
-		this.setState({
-			updateSearchesIntervalId: intervalId,
-		});
-	}
+  componentDidMount() {
+    // asynchronous data fetching.
+    this.searchArticles('', 1, Config.RESULTS_PER_PAGE);
+    this.updateSearches();
+    // activate polling.
+    const intervalId = setInterval(this.updateSearches.bind(this), Config.UPDATE_SEARCHES_INTERVAL * 1000);
+    this.setState({
+      updateSearchesIntervalId: intervalId,
+    });
+  }
 
-	componentWillUnmount() {
-		// clear polling.
+  componentWillUnmount() {
+    // clear polling.
 		clearInterval(this.state.updateSearchesIntervalId);
 	}
-	
+
 	render() {
 		const firstArticleIndex = (this.state.page - 1) * Config.RESULTS_PER_PAGE + 1;
 		const lastArticleIndex = Math.min(firstArticleIndex + Config.RESULTS_PER_PAGE - 1, this.state.total);
@@ -80,25 +80,25 @@ export default class App extends Component {
 		);
 	}
 
-	onFormChange(e) {
-		this.state.keyword = e.target.value;
-		this.state.page = 1;
+  onFormChange(e) {
+    const keyword = e.target.value;
+    this.state.keyword = keyword;
+    this.state.page = 1;
+    this.searchArticles(keyword, 1, Config.RESULTS_PER_PAGE);
 
-		if (this.state.createSearchTimeoutId != null) {
-			clearTimeout(this.state.createSearchTimeoutId);
-		}
-		// If the keyword is not empty, set timeout for createSearch function.
-		if (this.state.keyword != '') {
-			const timeoutId = setTimeout(() => {
-				this.createSearch(this.state.keyword);
-			}, Config.CREATE_SEARCH_WAIT_THRESHOLD * 1000);
-			this.setState({
-				createSearchTimeoutId: timeoutId,
-			});
-		}
-
-		this.searchArticles(this.state.keyword, 1, Config.RESULTS_PER_PAGE);
-	}
+    if (this.state.createSearchTimeoutId != null) {
+      clearTimeout(this.state.createSearchTimeoutId);
+    }
+    // If the keyword is not empty, set timeout for createSearch function.
+    if (this.state.keyword != '') {
+      const timeoutId = setTimeout(() => {
+        this.createSearch(keyword);
+      }, Config.CREATE_SEARCH_WAIT_THRESHOLD * 1000);
+      this.setState({
+        createSearchTimeoutId: timeoutId,
+      });
+    }
+  }
 
 	isAtFirstPage() {
 		if (this.state.page == 1) {
@@ -135,22 +135,24 @@ export default class App extends Component {
 		this.createSearch(keyword);
 	}
 
-	searchArticles(keyword='', page=1, resultsPerPage=10) {
-		const params = {
-			params: {
-				keyword: keyword,
-				page: page,
-				results_per_page: resultsPerPage,
-			}
-		};
-		axios.get(`${Config.API_ENDPOINT}/articles/search`, params).then((res) => {
-			console.log(res)
-			this.setState({
-				articles: res.data.articles,
-				total: res.data.total,
-				page: page,
-				keyword: keyword,
-			});
+  searchArticles(keyword='', page=1, resultsPerPage=10) {
+    const params = {
+      params: {
+        keyword: keyword,
+        page: page,
+        results_per_page: resultsPerPage,
+      }
+    };
+    axios.get(`${Config.API_ENDPOINT}/articles/search`, params).then((res) => {
+      // console.log(res);
+      // You don't necessarily get results for the latest keyword! so check it before updating the state..
+      if (res.data.keyword == this.state.keyword) {
+        this.setState({
+          articles: res.data.articles,
+          total: res.data.total,
+          page: page,
+        });
+      }
 		}).catch((err) => {
 			console.log(err);
 		});
